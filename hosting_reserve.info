@@ -1,0 +1,6 @@
+name = Site Reserve
+description = Clones sites in advance for SaaS purposes
+package = Hosting
+dependencies[] = hosting
+dependencies[] = hosting_saas
+core = 6.x

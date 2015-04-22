@@ -1,0 +1,78 @@
+<?php
+
+/**
+ * @file
+ *   Hosting reserve functions, and Drupal hooks.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function hosting_reserve_menu() {
+  $items['admin/hosting/reserve'] = array(
+    'title' => 'Site Reserve',
+    'description' => 'Configure settings for hosting site reserve',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('hosting_reserve_settings'),
+    'access arguments' => array('administer modules'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Configuration form for hosting_reserve
+ */
+function hosting_reserve_settings() {
+  $form['hosting_reserve_full_size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Full reserve size'),
+    '#description' => t('The maximum number of sites in the reserve. The template will be cloned until this number is reached.'),
+    '#default_value' => variable_get('hosting_reserve_full_size', '10'),
+    '#required' => TRUE,
+    '#weight' => -3,
+  );
+
+  $form['hosting_reserve_minimum_size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Minimum reserve size'),
+    '#description' => t('The minimum number of sites in the reserve to try to preserve at all times. When there are fewer than this many reserve sites, we ignore the refilling time window restrictions (see lower). Set to zero to allow full depletion between time windows.'),
+    '#default_value' => variable_get('hosting_reserve_minimum_size', '1'),
+    '#weight' => -2,
+  );
+
+  $server_time_message = t('The current server time is @time', array('@time' => date("H:i")));
+
+
+  $form['hosting_reserve_refill_window'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Time window for refilling'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#description' => t("Unless the reserve is depleted under the \"minimum reserve size\",  if you don't limit the hours, the reserve will always be refilling. This could slow down the time between request delivery if you have a few back-to-back, since clone and import tasks would run in-between the renaming tasks."),
+    '#weight' => -1,
+    '#prefix' => '<br/>',
+    '#suffix' => '<br/>',
+  );
+
+  $form['hosting_reserve_refill_window']['hosting_reserve_refill_window_start'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Start refilling the reserve at this hour.'),
+    '#description' => t('Format: 00:00. ') . $server_time_message,
+    '#default_value' => variable_get('hosting_reserve_refill_window_start', '00:00'),
+    '#maxlength' => 5,
+    '#size' => 6,
+    '#prefix' => '<br/>',
+  );
+
+  $form['hosting_reserve_refill_window']['hosting_reserve_refill_window_end'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Stop refilling the reserve at this hour.'),
+    '#description' => t('Format: 23:59. ') . $server_time_message,
+    '#default_value' => variable_get('hosting_reserve_refill_window_end', '04:00'),
+    '#maxlength' => 5,
+    '#size' => 6,
+  );
+
+  return system_settings_form($form);
+}
