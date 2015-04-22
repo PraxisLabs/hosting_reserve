@@ -108,3 +108,45 @@ function hosting_reserve_settings_form_validate(&$form, &$form_state) {
     $form_state['values']['hosting_reserve_minimum_size'] = '0';
   }
 }
+
+/**
+ * Checks whether we are currently within the allowed time window for refilling
+ * the site reserve.
+ */
+function hosting_reserve_is_allowed_time_window($time = NULL) {
+  if ($time === NULL) {
+    $time = time();
+  }
+
+  $today = date("D", time());
+
+  $start_time = variable_get('hosting_reserve_refill_window_start', '00:00');
+  $end_time = variable_get('hosting_reserve_refill_window_end', '04:00');
+
+  // Date field shenanigans
+  if (empty($start_time)) {
+    $start_time = strtotime('00:00'); // Midnight "this morning"
+  }
+  else {
+    $start_time = strtotime($start_time);
+  }
+
+  if (empty($end_time)) {
+    $end_time = strtotime('23:59');
+  }
+  else {
+    $end_time = strtotime($end_time);
+  }
+
+  if ($time < $start_time) {
+    // Before the start time
+    return FALSE;
+  }
+
+  if ($time > $end_time) {
+    // After the end time
+    return FALSE;
+  }
+
+  return TRUE;
+}
