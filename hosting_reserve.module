@@ -14,7 +14,7 @@ function hosting_reserve_menu() {
     'description' => 'Configure settings for hosting site reserve',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('hosting_reserve_settings'),
-    'access arguments' => array('administer modules'),
+    'access arguments' => array('administer modules'), // TODO find good permission
     'type' => MENU_LOCAL_TASK,
   );
   return $items;
@@ -74,5 +74,37 @@ function hosting_reserve_settings() {
     '#size' => 6,
   );
 
+  $form['#validate'][] = 'hosting_reserve_settings_form_validate';
+
   return system_settings_form($form);
+}
+
+function hosting_reserve_settings_form_validate(&$form, &$form_state) {
+  $date_format = 'H:i';
+
+  $values = $form_state['values'];
+
+  if (!empty($values['hosting_reserve_refill_window_start'])) {
+    if (strtotime($values['hosting_reserve_refill_window_start']) == 0) {
+      form_set_error('hosting_reserve_refill_window_start', t('Invalid start time'));
+    }
+  }
+
+  if (!empty($values['hosting_reserve_refill_window_end'])) {
+    if (strtotime($values['hosting_reserve_refill_window_end']) == 0) {
+      form_set_error('hosting_reserve_refill_window_end', t('Invalid end time'));
+    }
+  }
+
+  if (empty($values['hosting_reserve_refill_window_start'])) {
+    $form_state['values']['hosting_reserve_refill_window_start'] = '00:00';
+  }
+
+  if (empty($values['hosting_reserve_refill_window_end'])) {
+    $form_state['values']['hosting_reserve_refill_window_end'] = '23:59';
+  }
+
+  if (empty($values['hosting_reserve_minimum_size'])) {
+    $form_state['values']['hosting_reserve_minimum_size'] = '0';
+  }
 }
