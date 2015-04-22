@@ -30,7 +30,7 @@ function hosting_reserve_settings() {
     '#description' => t('The maximum number of sites in the reserve. The template will be cloned until this number is reached.'),
     '#default_value' => variable_get('hosting_reserve_full_size', '10'),
     '#required' => TRUE,
-    '#weight' => -3,
+    '#weight' => -15,
   );
 
   $form['hosting_reserve_minimum_size'] = array(
@@ -38,7 +38,15 @@ function hosting_reserve_settings() {
     '#title' => t('Minimum reserve size'),
     '#description' => t('The minimum number of sites in the reserve to try to preserve at all times. When there are fewer than this many reserve sites, we ignore the refilling time window restrictions (see lower). Set to zero to allow full depletion between time windows.'),
     '#default_value' => variable_get('hosting_reserve_minimum_size', '1'),
-    '#weight' => -2,
+    '#weight' => -10,
+  );
+
+  $form['hosting_reserve_clone_life_time'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Clone life time (in hours)'),
+    '#description' => t('Set to zero for infinite. Clones will be deleted if they stay in the "reserve" this long. Clone deletion will only occur within the refill window.'),
+    '#default_value' => variable_get('hosting_reserve_clone_life_time', '23'),
+    '#weight' => -5,
   );
 
   $server_time_message = t('The current server time is @time', array('@time' => date("H:i")));
