@@ -158,3 +158,53 @@ function hosting_reserve_is_allowed_time_window($time = NULL) {
 
   return TRUE;
 }
+
+function hosting_reserve_get_clones() {
+  // TODO: Search database for clone nodes
+}
+
+/**
+ * Deploys a new site, either from a reserve clone or by cloning the template.
+ *
+ * This is the main function to call to deploy a new site.
+ */
+function hosting_reserve_make_site($url) {
+  // Get clones
+  $clones = hosting_reserve_get_clones();
+
+  if (!empty($clones)) {
+    // Deploy first available clone
+    // TODO something like this:
+    // hosting_reserve_deploy_clone($url, $clones[0]);
+    
+  }
+  else {
+    // If no clones left, clone site as normal
+    // TODO: hosting_saas_clone()?  
+  }
+}
+
+function hosting_reserve_deploy_clone($url, $clone) {
+  // TODO
+}
+
+function hosting_reserve_make_clone() {
+  // TODO
+}
+
+function hosting_reserve_cron() {
+  watchdog('hosting_reserve', 'hosting_reserve_cron');
+
+  // TODO: Also consider minimum reserve size
+  if (hosting_reserve_is_allowed_time_window()) {
+    // Check for expired clones and delete them
+    // TODO: hosting_reserve_get_clones() etc.
+
+    // Count the clones
+    // TODO
+    
+
+    // Make a new clone if necessary
+    // TODO
+  }
+}
