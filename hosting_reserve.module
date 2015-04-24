@@ -5,6 +5,8 @@
  *   Hosting reserve functions, and Drupal hooks.
  */
 
+define('HOSTING_RESERVE_DEFAULT_CLONE_DOMAIN', 'clone');
+
 /**
  * Implementation of hook_menu().
  */
@@ -159,8 +161,29 @@ function hosting_reserve_is_allowed_time_window($time = NULL) {
   return TRUE;
 }
 
-function hosting_reserve_get_clones() {
-  // TODO: Search database for clone nodes
+/**
+ * Get available clones.
+ *
+ * We ignore taken clones (ie clones with an alias).
+ */
+function hosting_reserve_get_clones($pattern = NULL) {
+  if ($pattern == NULL) {
+    $pattern = '%.' . HOSTING_RESERVE_DEFAULT_CLONE_DOMAIN;
+  }
+
+  $result = db_query("SELECT nid FROM node WHERE type = 'site' AND title LIKE '%s'", $pattern);
+
+  $clones = array();
+  while ($obj = db_fetch_object ($result)) {
+    $node = node_load($obj->nid);
+
+    // Exclude 'taken' clones
+    if (empty($node->aliases)) {
+      $clones[$obj->nid] = $node;
+    }
+  }
+
+  return $clones;
 }
 
 /**
@@ -174,22 +197,31 @@ function hosting_reserve_make_site($url) {
 
   if (!empty($clones)) {
     // Deploy first available clone
-    // TODO something like this:
-    // hosting_reserve_deploy_clone($url, $clones[0]);
-    
+    $clone = array_shift($clones);
+    hosting_reserve_alias_clone($url, $clone);
+
+    return $clone;
   }
   else {
     // If no clones left, clone site as normal
-    // TODO: hosting_saas_clone()?  
+    // TODO: hosting_saas_clone()?
+    return 404;
   }
 }
 
-function hosting_reserve_deploy_clone($url, $clone) {
+function hosting_reserve_alias_clone($url, $clone) {
+  // TODO: Validate URL
+  $clone->aliases[] = $url;
+
+  node_save($clone); // This triggers a Verify
+}
+
+function hosting_reserve_migrate_clone($url, $clone) {
   // TODO
 }
 
 function hosting_reserve_make_clone() {
-  // TODO
+  // TODO : Create clone task
 }
 
 function hosting_reserve_cron() {
@@ -207,4 +239,12 @@ function hosting_reserve_cron() {
     // Make a new clone if necessary
     // TODO
   }
+}
+
+function hosting_reserve_post_hosting_verify_task($task, $data) {
+  drush_log('[hosting_reserve] hosting_reserve_post_hosting_verify_task');
+
+  // TODO: Determine if the alias was just added
+
+  // TODO: Implement hook to allow acting on site after it gets aliased
 }
