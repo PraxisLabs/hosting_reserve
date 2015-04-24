@@ -223,7 +223,28 @@ function hosting_reserve_migrate_clone($url, $clone) {
 }
 
 function hosting_reserve_make_clone() {
-  // TODO : Create clone task
+  $clone_id = variable_get('hosting_reserve_next_clone_id', 1);
+  $clone_domain = variable_get('hosting_reserve_clone_domain', HOSTING_RESERVE_DEFAULT_CLONE_DOMAIN);
+  $clone_sub_prefix = variable_get('hosting_reserve_clone_sub_prefix', 'hosting_reserve-');
+
+  $url = $clone_sub_prefix . $clone_id . '.' . $clone_domain;
+
+  module_invoke_all('hosting_reserve_new_clone', $url);
+
+
+  $error_message = '';
+  hosting_saas_clone_site_from_template($url, $error_message);
+
+  // TODO: Find something more elegant... Maybe $error_message as reference arg?
+  if ($error_message != '') {
+    return $error_message;
+  }
+
+  // This means the clone_id is not incremented when there is an error.
+  $clone_id += 1;
+  variable_set('hosting_reserve_next_clone_id', $clone_id);
+
+  return $url;
 }
 
 function hosting_reserve_cron() {
