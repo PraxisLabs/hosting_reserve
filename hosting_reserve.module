@@ -204,8 +204,10 @@ function hosting_reserve_make_site($url) {
   }
   else {
     // If no clones left, clone site as normal
-    // TODO: hosting_saas_clone()?
-    return 404;
+    $error_message = '';
+    hosting_saas_clone_site_from_template($url, $error_message);
+
+    return $error_message;
   }
 }
 
