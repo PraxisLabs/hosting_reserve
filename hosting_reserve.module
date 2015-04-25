@@ -218,8 +218,37 @@ function hosting_reserve_alias_clone($url, $clone) {
   node_save($clone); // This triggers a Verify
 }
 
+/**
+ * Migrate a clone to the permanent URL.
+ *
+ * The alias is a temporary measure, things can get weird if we don't do this.
+ */
 function hosting_reserve_migrate_clone($url, $clone) {
-  // TODO
+  // 1. Remove the alias
+  $index = array_search($url, $clone->aliases);
+
+  if ($index === FALSE) {
+    // Wrong site
+    return FALSE;
+  }
+
+  unset($clone->aliases[$index]);
+  
+  node_save($clone); // This will trigger a Verify.
+
+  // 2. Migrate
+  $args = array(
+    'new_uri' => $url,
+    'new_db_server' => variable_get('hosting_saas_db_server', NULL),
+    'target_platform' => variable_get('hosting_saas_target_platform', NULL),
+  );
+
+  // Allow other modules to modify the options
+  module_invoke_all('hosting_saas_migrate_clone', $url, $args);
+
+  hosting_add_task($clone->nid, 'migrate', $args);
+
+  return TRUE;
 }
 
 function hosting_reserve_make_clone() {
