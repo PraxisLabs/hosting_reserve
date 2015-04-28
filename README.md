@@ -75,6 +75,14 @@ Q: **How does this module know which site to clone?**
 
 A: We just use the hosting\_saas settings. See Hosting -> SaaS.
 
+Q: **It's not working!**
+
+A: That's not a question. There are many things that can go wrong here. Make sure you configured hosting\_saas and you have some way to create requests. Check the variables with drush vget hosting\_reserve.
+
+In particular, the hosting\_reserve\_next\_clone\_id variable may need to be changed if you manually created some clones.
+
+If you think you've found an actual bug, please open an issue in the GitHub queue.
+
 Q: **Can I just use this module without configuring it?**
 
 A: Pretty much. It will use the hosting\_saas settings, so you'll still need to configure that first.
@@ -90,3 +98,9 @@ A: Historically, some errors have appeared only when using the site through its 
 Q: **I think this should do [X].**
 
 A: Pull requests welcome. If you're not a coder, submit an issue and we'll see what we can do. If you need this for commercial use, consider [sponsoring the development](http://praxis.coop/en/contact).
+
+## License
+
+(C) 2015 Guillaume Boudrias gboudrias@gboudrias.ca (C) 2015 Praxis Laboratories Coop info@praxis.coop
+
+Distributed under the terms of the GNU General public license (GPL). See LICENSE.txt for details.
