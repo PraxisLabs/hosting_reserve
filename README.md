@@ -13,7 +13,8 @@ In short, this is how this module works:
 1. Make clones of the template site.
 2. When someone asks for a new site, take one of these clones and give it an alias. Hurray, the person can use their new site!
 3. [When no one is looking] Migrate the site to its permanent URL.
-4. Delete old clones. Back to step 1!
+4. Delete old clones.
+5. Repeat
 
 ## But why?
 
