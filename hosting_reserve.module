@@ -169,7 +169,7 @@ function hosting_reserve_get_clones($pattern = NULL, $include_aliased = FALSE) {
     $pattern = '%.' . HOSTING_RESERVE_DEFAULT_CLONE_DOMAIN;
   }
 
-  $result = db_query("SELECT nid FROM node WHERE type = 'site' AND title LIKE '%s'", $pattern);
+  $result = db_query("SELECT nid FROM node WHERE type = 'site' AND title LIKE '%s' ORDER BY created ASC", $pattern);
 
   $clones = array();
   while ($obj = db_fetch_object ($result)) {
@@ -253,7 +253,7 @@ function hosting_reserve_migrate_clone($url, $clone) {
   return TRUE;
 }
 
-function hosting_reserve_make_clone() {
+function hosting_reserve_make_clone(&$error_message = '') {
   $clone_id = variable_get('hosting_reserve_next_clone_id', 1);
   $clone_domain = variable_get('hosting_reserve_clone_domain', HOSTING_RESERVE_DEFAULT_CLONE_DOMAIN);
   $clone_sub_prefix = variable_get('hosting_reserve_clone_sub_prefix', 'hosting-reserve-');
@@ -287,8 +287,6 @@ function _hosting_reserve_clean_up_clones() {
       $time_since_creation = time() - $clone->created;
       $life_time_in_seconds = variable_get('hosting_reserve_clone_life_time', '23') * 60 * 60;
 
-      $life_time_in_seconds = 0; // TEST
-
       if ($time_since_creation > $life_time_in_seconds) {
         // Delete site
         hosting_add_task($clone->nid, 'delete');
@@ -306,21 +304,27 @@ function _hosting_reserve_clean_up_clones() {
 }
 
 function hosting_reserve_cron() {
-//  watchdog('hosting_reserve', 'hosting_reserve_cron');
-
-//  hosting_reserve_get_clones();
+  $clones = hosting_reserve_get_clones();
 
   if (hosting_reserve_is_allowed_time_window()) {
-//    _hosting_reserve_clean_up_clones();
+    _hosting_reserve_clean_up_clones();
 
-    // Count the clones
-    // TODO
-    
-    // Make a new clone if necessary
-    // TODO
+    if (count($clones) < variable_get('hosting_reserve_full_size', 10)) {
+      $error_message = '';
+
+      // This will fail if a clone is already ongoing, so there's no risk of
+      // going over the full reserve size while the task is queued.
+      hosting_reserve_make_clone($error_message);
+
+      // TODO: Implement setting to show error messages in the dblog
+    }
   }
   else {
-    // TODO: Minimum reserve size
+    if (count($clones) < variable_get('hosting_reserve_minimum_size', 1)) {
+      watchdog('hosting_reserve', '(cron) Reserve depleted, making new clone.');
+
+      hosting_reserve_make_clone();
+    }
   }
 }
 
