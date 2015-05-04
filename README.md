@@ -1,10 +1,12 @@
 # Site Reserve
 
+**THIS MODULE IS UNTESTED.** Use at your own risk.
+
 This module is an extension of hosting\_saas that creates a stockpile of sites to accelerate the delivery of new sites.
 
 The point of this module is to enhance the performance of an Aegir-based SaaS service. You can use this module's make\_site function instead of using the basic hosting\_saas function.
 
-This module was originally developped by [Praxis Labs](http://praxis.coop) for the [GetOpenOutreach](http://getopenoutreach.com) service.
+This module is being developped by [Praxis Labs](http://praxis.coop) for the [GetOpenOutreach](http://getopenoutreach.com) service.
 
 ## What is this witchcraft?
 
